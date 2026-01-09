@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steam Market Analytics Portfolio</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f5f7;
+            color: #172B4D;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            margin: 0;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        /* --- SECTION 1: SCATTER PLOT --- */
+        .chart-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #EBECF0;
+            padding-bottom: 15px;
+        }
+
+        h2 { margin: 0; color: #0052CC; }
+        p { margin: 5px 0 0 0; color: #6B778C; font-size: 0.9rem; }
+
+        #scatterPlot {
+            width: 100%;
+            height: 400px;
+            position: relative;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            padding: 12px;
+            font-size: 12px;
+            background: #172B4D;
+            color: #fff;
+            border-radius: 4px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 100;
+            line-height: 1.5;
+            max-width: 200px;
+        }
+
+        /* --- SECTION 2: CALCULATOR --- */
+        .calculator-wrapper {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .controls-panel {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .viz-panel {
+            flex: 1.5;
+            min-width: 450px;
+            background: #172B4D;
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Re-using your specific styles */
+        .control-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 0.85rem; color: #42526E; }
+        input[type=range] { width: 100%; accent-color: #0052CC; cursor: pointer; }
+        .slider-value { float: right; color: #0052CC; font-weight: bold; }
+        
+        .sentiment-grid { display: grid; gap: 8px; grid-template-columns: 1fr 1fr; }
+        .sentiment-option {
+            display: flex; align-items: center; padding: 6px 10px;
+            border: 1px solid #EBECF0; border-radius: 6px; cursor: pointer; font-size: 0.85rem;
+        }
+        .sentiment-option:hover { background-color: #F4F5F7; }
+        .sentiment-option.selected { border-color: #0052CC; background-color: #DEEBFF; }
+        .sentiment-color { width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; flex-shrink: 0; }
+
+        .revenue-display { font-size: 3.5rem; font-weight: bold; color: #36B37E; margin: 10px 0; line-height: 1; }
+        .sales-display { font-size: 1.5rem; font-weight: 600; color: #FFC400; }
+        
+        .comparison-container { width: 100%; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; }
+        .comp-row { display: flex; align-items: center; margin-bottom: 10px; font-size: 0.8rem; }
+        .comp-label { width: 100px; text-align: right; margin-right: 15px; opacity: 0.8; }
+        .comp-bar-bg { flex: 1; background: rgba(255,255,255,0.1); height: 6px; border-radius: 3px; }
+        .comp-bar-fill { height: 100%; border-radius: 3px; width: 0%; transition: width 0.3s; }
+        .comp-val { width: 70px; margin-left: 10px; font-weight: bold; text-align: right; }
+
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+
+    <div class="chart-section">
+        <div class="section-header">
+            <div>
+                <h2>Steam Market Landscape</h2>
+                <p>Visualization of games analyzed via R Script. <strong>Click a bubble</strong> to load it into the calculator.</p>
+                <p style="margin-top: 10px; font-size: 0.8rem; color: #505F79; background: #F4F5F7; padding: 6px 10px; border-radius: 4px; display: inline-block;">
+                    <strong>Data Snapshot:</strong> Dec 10, 2025 &bull; 
+                    <strong>Scope:</strong> Games with 500+ reviews released 2018–2025.
+                </p>
+            </div>
+            <div id="loadingMsg" style="color: #0052CC; font-weight: bold;">Loading Data...</div>
+        </div>
+        <div id="scatterPlot"></div>
+    </div>
+
+    <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 30px;">
+        <h3 style="margin-top: 0; color: #172B4D; border-bottom: 1px solid #EBECF0; padding-bottom: 15px;">Key Strategic Insights</h3>
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 300px;">
+                <h4 style="color: #0052CC; margin-bottom: 10px;">1. The Pricing "Valley of Death"</h4>
+                <p style="font-size: 0.9rem; color: #42526E; line-height: 1.6;">
+                    The analysis identified a significant dip in median unit sales for games priced between <strong>$28 and $39</strong>. Titles in this range face an identity crisis: they lack the "impulse buy" friction of $20 games but struggle to compete with the production value perceived in $50+ titles.
+                    <br><br>
+                    <strong>Recommendation:</strong> Developers should either aggressively scope for <strong>$19.99</strong> (high volume) or commit to premium production values to justify <strong>$49.99+</strong> (high margin).
+                </p>
+            </div>
+            <div style="flex: 1; min-width: 300px;">
+                <h4 style="color: #36B37E; margin-bottom: 10px;">2. The "Patient Gamer" Effect</h4>
+                <p style="font-size: 0.9rem; color: #42526E; line-height: 1.6;">
+                    Regression modeling of the 2018–2024 cohorts reveals that Year 1 revenue accounts for only <strong>~60% of Lifetime Value (LTV)</strong> for positively rated games. 
+                    <br><br>
+                    <strong>Implication:</strong> Marketing spend should not be exhausted at launch. A "long-tail" wishlist conversion strategy is critical, as the data shows consistent sales accumulation through Year 2 and Year 3 discount cycles.
+                </p>
+            </div>
+        </div>
+
+        <div style="margin-top: 40px; border-top: 1px solid #EBECF0; padding-top: 20px; color: #6B778C; font-size: 0.8rem;">
+            <h4 style="margin: 0 0 10px 0; color: #42526E; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">Sources & References</h4>
+            <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.6;">
+                <li style="margin-bottom: 5px;">
+                    <strong>Methodology (The Boxleiter Method):</strong> Adapted from Jake Birkett's analysis at 
+                    <a href="https://greyaliengames.com/blog/how-to-estimate-how-many-sales-a-steam-game-has-made/" target="_blank" style="color: #0052CC; text-decoration: none;">Grey Alien Games</a>.
+                </li>
+                <li style="margin-bottom: 5px;">
+                    <strong>Multiplier Benchmarks:</strong> Refined using Simon Carless's "GameDiscoverCo" research on 
+                    <a href="https://newsletter.gamediscover.co/p/how-that-game-sold-on-steam-using" target="_blank" style="color: #0052CC; text-decoration: none;">Steam Revenue Estimation</a>.
+                </li>
+                <li style="margin-bottom: 5px;">
+                    <strong>Raw Data Source:</strong> Public game metrics scraped from 
+                    <a href="https://steamdb.info/" target="_blank" style="color: #0052CC; text-decoration: none;">SteamDB</a> (December 10, 2025 Snapshot).
+                </li>
+                <li style="margin-bottom: 5px;">
+                    <strong>Development Support:</strong> R scripting, regression modeling, and D3.js implementation assisted by 
+                    <span style="color: #172B4D; font-weight: 500;">Google Gemini</span>.
+                </li>
+            </ul>
+            <p style="margin-top: 15px; font-style: italic; opacity: 0.8;">
+                *This dashboard is a portfolio project and is not affiliated with Valve Corp or SteamDB. All estimates are heuristic-based.
+            </p>
+        </div>
+    </div>
+
+    <div class="calculator-wrapper">
+        <div class="controls-panel">
+            <h3 style="margin-top:0; color:#172B4D;">Simulation Controls</h3>
+            <p style="font-size:0.85rem; color:#6B778C; margin-bottom:20px;">Adjust sliders to simulate changes in pricing or engagement.</p>
+
+            <div class="control-group">
+                <label>Total Reviews <span id="reviewsVal" class="slider-value">--</span></label>
+                <input type="range" id="reviewsInput" min="500" max="3000000" step="500">
+            </div>
+
+            <div class="control-group">
+                <label>Total Followers <span id="followersVal" class="slider-value">--</span></label>
+                <input type="range" id="followersInput" min="0" max="500000" step="500">
+            </div>
+
+            <div class="control-group">
+                <label>Unit Price ($) <span id="priceVal" class="slider-value">--</span></label>
+                <input type="range" id="priceInput" min="1" max="200" step="1">
+            </div>
+
+            <div class="control-group">
+                <label>Review Sentiment</label>
+                <div class="sentiment-grid" id="sentimentContainer"></div>
+            </div>
+        </div>
+
+        <div class="viz-panel">
+            <h3 style="margin:0; opacity: 0.9; font-size: 1.1rem;">Consensus Estimates</h3>
+            
+            <div class="revenue-display" id="bigNumberRevenue">$0</div>
+            <div style="font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; opacity:0.8;">Proj. Gross Revenue</div>
+
+            <div class="sales-display" id="bigNumberSales">0 units</div>
+            
+            <div class="comparison-container">
+                <div class="comp-row">
+                    <div class="comp-label">Method A: Reviews</div>
+                    <div class="comp-bar-bg"><div class="comp-bar-fill" id="barReviews" style="background: #00B8D9;"></div></div>
+                    <div class="comp-val" id="valReviews">$0</div>
+                </div>
+                <div class="comp-row">
+                    <div class="comp-label">Method B: Followers</div>
+                    <div class="comp-bar-bg"><div class="comp-bar-fill" id="barFollowers" style="background: #6554C0;"></div></div>
+                    <div class="comp-val" id="valFollowers">$0</div>
+                </div>
+            </div>
+
+            <p style="margin-top: 25px; font-size: 0.75rem; color: #B3BAC5; line-height: 1.5; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+                <strong>Methodology:</strong> This model utilizes a "Consensus Approach" to triangulate sales data. 
+                <strong>(1)</strong> The <em>Review Method</em> applies a sentiment-adjusted Boxleiter multiplier (20x–60x) to total reviews. 
+                <strong>(2)</strong> The <em>Follower Method</em> applies a conversion heuristic (~12x) to SteamDB followers. 
+                The final <strong>Projected Units Sold</strong> is the weighted average of these two indicators.
+            </p>
+        </div>
+    </div>
+
+</div> <div class="tooltip" id="tooltip"></div>
+
+<script>
+    // --- 1. GLOBAL STATE & CONFIG ---
+    const sentiments = [
+        { label: "Overwhelmingly Positive", value: 30, color: "#66c0f4" }, 
+        { label: "Very Positive", value: 35, color: "#4c6b22" },
+        { label: "Positive", value: 40, color: "#a1b44c" },
+        { label: "Mixed", value: 60, color: "#b9a074" }, 
+        { label: "Mostly Negative", value: 45, color: "#a34c25" },
+        { label: "Negative", value: 30, color: "#a83030" },
+        { label: "Overwhelmingly Negative", value: 20, color: "#5c1313" } 
+    ];
+
+    let currentReviews = 5000;
+    let currentFollowers = 5000;
+    let currentPrice = 20;
+    let currentSentiment = sentiments[1]; 
+
+    // --- 2. INITIALIZE CALCULATOR UI ---
+    const container = document.getElementById('sentimentContainer');
+    sentiments.forEach((s, index) => {
+        const div = document.createElement('div');
+        div.className = `sentiment-option ${index === 1 ? 'selected' : ''}`;
+        div.onclick = () => selectSentiment(index);
+        div.innerHTML = `<div class="sentiment-color" style="background-color: ${s.color}"></div><span>${s.label}</span>`;
+        container.appendChild(div);
+    });
+
+    // --- 3. LOAD DATA ---
+    d3.json("steam_data.json").then(function(data) {
+        d3.select("#loadingMsg").style("display", "none");
+
+        data.forEach(d => {
+            d.reviews = +d.reviews;
+            d.price = +d.price;
+            d.followers = +d.followers || (+d.wishlists / 10) || 0; 
+            d.estRevenue = d.reviews * 40 * d.price; 
+        });
+
+        const svgWidth = document.getElementById('scatterPlot').clientWidth;
+        const svgHeight = 400;
+        const margin = {top: 20, right: 20, bottom: 40, left: 60};
+        const width = svgWidth - margin.left - margin.right;
+        const height = svgHeight - margin.top - margin.bottom;
+
+        const svg = d3.select("#scatterPlot")
+            .append("svg")
+            .attr("width", svgWidth)
+            .attr("height", svgHeight)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        const x = d3.scaleLinear().domain([0, 70]).range([0, width]);
+        const y = d3.scaleLinear().domain([0, d3.max(data, d => d.estRevenue)]).range([height, 0]);
+
+        svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x).tickFormat(d => "$" + d));
+        svg.append("g").call(d3.axisLeft(y).tickFormat(d => d3.format(".2s")(d)));
+
+        const tooltip = d3.select("#tooltip");
+
+        svg.append('g').selectAll("circle").data(data).join("circle")
+            .attr("cx", d => x(d.price))
+            .attr("cy", d => y(d.estRevenue))
+            .attr("r", 6).style("fill", "#0052CC").style("opacity", 0.6).style("stroke", "white").style("cursor", "pointer")
+            .on("mouseover", function(event, d) {
+                d3.select(this).style("opacity", 1).attr("r", 10).style("fill", "#FFAB00");
+                tooltip.transition().duration(200).style("opacity", 1);
+                tooltip.html(`<strong>${d.title}</strong><br>Price: $${d.price}<br>Reviews: ${d3.format(",")(d.reviews)}`)
+                    .style("left", (event.pageX + 10) + "px").style("top", (event.pageY - 28) + "px");
+            })
+            .on("mouseout", function() {
+                d3.select(this).style("opacity", 0.6).attr("r", 6).style("fill", "#0052CC");
+                tooltip.transition().duration(500).style("opacity", 0);
+            })
+            .on("click", function(event, d) {
+                updateCalculatorInputs(d);
+            });
+
+    }).catch(function(error) { console.log(error); });
+
+
+    // --- 4. CALCULATOR LOGIC ---
+
+    function updateCalculatorInputs(dataPoint) {
+        currentReviews = dataPoint.reviews;
+        currentFollowers = dataPoint.followers;
+        currentPrice = dataPoint.price;
+        
+        document.getElementById('reviewsInput').value = currentReviews;
+        document.getElementById('followersInput').value = currentFollowers;
+        document.getElementById('priceInput').value = Math.round(currentPrice);
+
+        const sentIndex = sentiments.findIndex(s => s.label === dataPoint.sentiment);
+        if(sentIndex >= 0) selectSentiment(sentIndex);
+
+        updateLabels();
+        recalculate();
+        document.querySelector('.calculator-wrapper').scrollIntoView({behavior: 'smooth'});
+    }
+
+    function selectSentiment(index) {
+        currentSentiment = sentiments[index];
+        const options = document.querySelectorAll('.sentiment-option');
+        options.forEach(opt => opt.classList.remove('selected'));
+        options[index].classList.add('selected');
+        recalculate();
+    }
+
+    function updateLabels() {
+        document.getElementById('reviewsVal').innerText = d3.format(",")(currentReviews);
+        document.getElementById('followersVal').innerText = d3.format(",")(currentFollowers);
+        document.getElementById('priceVal').innerText = "$" + currentPrice;
+    }
+
+    function recalculate() {
+        const estSalesReviews = currentReviews * currentSentiment.value;
+        const revMethodRevenue = estSalesReviews * currentPrice;
+
+        const estSalesFollowers = currentFollowers * 12; 
+        const followerMethodRevenue = estSalesFollowers * currentPrice;
+
+        const consensusRevenue = (revMethodRevenue + followerMethodRevenue) / 2;
+        const consensusSales = (estSalesReviews + estSalesFollowers) / 2;
+
+        d3.select("#bigNumberRevenue").text("$" + d3.format(".2s")(consensusRevenue).replace('G', 'B'));
+        d3.select("#bigNumberSales").text(d3.format(",.2s")(consensusSales) + " units");
+
+        const maxVal = Math.max(revMethodRevenue, followerMethodRevenue) * 1.2 || 1;
+        
+        d3.select("#barReviews").transition().style("width", (revMethodRevenue / maxVal * 100) + "%");
+        d3.select("#valReviews").text(d3.format(".2s")(revMethodRevenue));
+
+        d3.select("#barFollowers").transition().style("width", (followerMethodRevenue / maxVal * 100) + "%");
+        d3.select("#valFollowers").text(d3.format(".2s")(followerMethodRevenue));
+    }
+
+    document.getElementById('reviewsInput').addEventListener('input', function(e) {
+        currentReviews = +e.target.value; updateLabels(); recalculate();
+    });
+    document.getElementById('followersInput').addEventListener('input', function(e) {
+        currentFollowers = +e.target.value; updateLabels(); recalculate();
+    });
+    document.getElementById('priceInput').addEventListener('input', function(e) {
+        currentPrice = +e.target.value; updateLabels(); recalculate();
+    });
+
+    updateLabels();
+    recalculate();
+
+</script>
+</body>
+</html>
