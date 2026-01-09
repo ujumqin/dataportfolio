@@ -22,6 +22,53 @@
             width: 100%;
         }
 
+        /* --- HERO SECTION --- */
+        .hero-section {
+            background: linear-gradient(135deg, #ffffff 0%, #f4f5f7 100%);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            text-align: center;
+            border: 1px solid #EBECF0;
+        }
+
+        .hero-title {
+            margin: 0 0 15px 0;
+            font-size: 2rem;
+            color: #172B4D;
+        }
+
+        .hero-text {
+            max-width: 750px;
+            margin: 0 auto 25px auto;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #42526E;
+        }
+
+        .hero-link {
+            color: #0052CC;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .hero-link:hover { text-decoration: underline; }
+
+        .linkedin-btn {
+            display: inline-block;
+            background-color: #0077B5;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+
+        .linkedin-btn:hover { background-color: #005582; }
+
         /* --- SECTION 1: SCATTER PLOT --- */
         .chart-section {
             background: white;
@@ -125,6 +172,20 @@
 <body>
 
 <div class="dashboard-container">
+
+    <div class="hero-section">
+        <h1 class="hero-title">Steam Market Analytics: The "Missing" Data</h1>
+        <p class="hero-text">
+            Hi, I'm <strong>Sine</strong>. This project was sparked by a controversial claim from Ubisoft that 
+            <a href="https://insider-gaming.com/ubisoft-people-playing-fewer-games-struggling/" target="_blank" class="hero-link">players are buying fewer new games</a>. 
+            <br><br>
+            To validate this macro-trend, I first needed to solve a micro-problem: <em>How do we estimate sales when Steam doesn't share them?</em> 
+            The result is the triangulation engine below, which reconciles public metrics (Reviews & Followers) into actionable sales projections.
+        </p>
+        <a href="https://www.linkedin.com/in/sinegov/" target="_blank" class="linkedin-btn">
+            Connect on LinkedIn &rarr;
+        </a>
+    </div>
 
     <div class="chart-section">
         <div class="section-header">
