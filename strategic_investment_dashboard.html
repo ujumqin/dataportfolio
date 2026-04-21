@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategic Analysis Dashboard</title>
+    <style>
+        body { background-color: #000; color: #fff; font-family: -apple-system, sans-serif; margin: 0; padding: 0; }
+        #app-container { display: flex; flex-direction: row; height: 100vh; width: 100vw; overflow: hidden; }
+        #chart { flex-grow: 1; min-width: 0; }
+        #side-panel { 
+            width: 320px; background-color: #111; border-left: 1px solid #333; 
+            padding: 15px; overflow-y: auto; box-sizing: border-box;
+            display: flex; flex-direction: column;
+        }
+        .metric-box { margin-bottom: 12px; border-bottom: 1px solid #333; padding-bottom: 8px; }
+        .metric-title { font-size: 10px; color: cyan; text-transform: uppercase; letter-spacing: 1px; }
+        .metric-value { font-size: 20px; font-weight: bold; margin-top: 2px; }
+        .city-name { font-size: 22px; color: #fff; margin-bottom: 15px; border-bottom: 2px solid cyan; padding-bottom: 8px; }
+        .formula { font-size: 9px; color: #666; font-style: italic; display: block; margin-top: 2px; }
+        
+        /* Map Legend */
+        .legend-box { margin-top: auto; padding-top: 20px; border-top: 2px solid #444; }
+        .legend-item { display: flex; align-items: center; margin-bottom: 8px; font-size: 11px; color: #aaa; }
+        .dot { height: 12px; width: 12px; border-radius: 50%; display: inline-block; margin-right: 10px; }
+        
+        @media (max-width: 768px) {
+            #app-container { flex-direction: column; overflow: auto; height: auto; }
+            #chart { height: 60vh; width: 100%; }
+            #side-panel { width: 100%; border-left: none; border-top: 1px solid cyan; height: auto; }
+            .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+            .metric-box { margin-bottom: 0; border-bottom: none; background: #222; padding: 10px; border-radius: 4px; }
+            .legend-box { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div id="app-container">
+        <div id="chart"><div>                        <script type="text/javascript">window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-3.1.0.min.js" integrity="sha256-Ei4740bWZhaUTQuD6q9yQlgVCMPBz6CZWhevDYPv93A=" crossorigin="anonymous"></script>                <div id="00d313b1-1f18-4a72-9666-10c79e64d784" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("00d313b1-1f18-4a72-9666-10c79e64d784")) {                    Plotly.newPlot(                        "00d313b1-1f18-4a72-9666-10c79e64d784",                        [{"customdata":{"dtype":"f8","bdata":"AAAAAAAAUkC8AbZdNYVsQODGF+d\u002f1iVBYhIL4pQACMCqXv3ynf9EQAAAAAAAAEtAwolf1sPxZkAfRRZnOIktQe0VKqdI89y\u002f\u002fxu6G15VRUAAAAAAAIBFQK1tkY6EoWJAj1f197sJFUHP2RuIeNjrvymWeETwBkZAAAAAAAAAU0CFxA4pvTlFQBBvWV74QhZBObVi6jDR+z9PCwdM1ztDQAAAAAAAgFZAsW0ssiPhUUAZ8swUksQSQf5opc+1ug9AR5LIgq8PQUAAAAAAAIBFQIwYqJul3V9AV3yIUldvF0EK7UF82Nv6v6TzdK\u002fMpklAAAAAAAAATkBl8PhvXWNQQKhaC+iAWhtBWPIp+ooMDkAi065sbvlIQAAAAAAAAERAUJ3GgfQfYECIn5NpznExQcYm2GqNoBXASeLbSoWCNEAAAAAAAABFQA82Ckng51ZAcJ7X5YDvJkF2hJwYRNEVQG2h5ewYE0ZAAAAAAAAASkD17XR0WgRrQBBghQvdvixBopHsHIat9j9\u002fB+dQpa1KQAAAAAAAgFFAe30gllSBVUBFDVMMPKMXQSyNFOg1VB9AWvJruPweTUAAAAAAAABZQFDDhdZQOV1AsN7RlcYHEUFq3t0k\u002fEMYQPmPLv+OhDxAAAAAAAAAWkB0sFiNOmxVQDmGKAKTEBpBAo\u002fcRDjwBkBmP\u002fxMtTQ9QAAAAAAAgERA5Jfx\u002fwylaUBuCndvKPETQeKvDzNPpgdA94IEwQqGSkAAAAAAAAA\u002fQNS07SAr\u002f3pA9S60uyj4OEE6kvYlDYXzv48ChWks30RAAAAAAACAV0CyNDA5J5tYQEUtHku+SxVBEacbG0BVGEBjhdLhhaBHQA==","shape":"16, 5"},"hovertemplate":"\u003cb\u003e%{text}\u003c\u002fb\u003e\u003cbr\u003eClick for Metrics\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":{"dtype":"f8","bdata":"VVVVVVVV3T9VVVVVVVXhP6uqqqqqquE\u002fVVVVVVVV0T8AAAAAAADYPwAAAAAAAN4\u002fq6qqqqqq2j+rqqqqqqrgP6uqqqqqquQ\u002fAAAAAAAA5D8AAAAAAADiP6uqqqqqqt4\u002fVVVVVVVV0T8AAAAAAADoP1VVVVVVVec\u002fAAAAAAAA4D8="},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"line":{"color":"white","width":1},"opacity":0.8,"size":{"dtype":"f8","bdata":"KAEk6XgDU0BYYn\u002fIr5dOQJHnwWhb10hAXFu+NvxMLECX5+VC2tY3QLNlxWduPkVAh0Ch6tHZNUDA0Qit8H9FQL\u002fyYmGAij5A+fNN+OYCUkD5USvIcKw8QDWCrjmLe0NA8JXLEU6QPECYuktVsxhRQOPN8xVy\u002f2FAd3h1e29nQEA="},"sizemode":"area"},"mode":"markers","text":["New York, NY","Los Angeles, CA","Chicago, IL","Dallas, TX","Houston, TX","Philadelphia, PA","Phoenix, AZ","San Francisco, CA","Seattle, WA","San Diego, CA","Charlotte, NC","San Antonio, TX","Austin, TX","Columbus, OH","San Jose, CA","Jacksonville, FL"],"x":{"dtype":"f8","bdata":"YhIL4pQACMDtFSqnSPPcv8\u002fZG4h42Ou\u002fObVi6jDR+z\u002f+aKXPtboPQArtQXzY2\u002fq\u002fWPIp+ooMDkDGJthqjaAVwHaEnBhE0RVAopHsHIat9j8sjRToNVQfQGre3ST8QxhAAo\u002fcRDjwBkDirw8zT6YHQDqS9iUNhfO\u002fEacbG0BVGEA="},"y":{"dtype":"f8","bdata":"ql798p3\u002fRED\u002fG7obXlVFQCmWeETwBkZATwsHTNc7Q0BHksiCrw9BQKTzdK\u002fMpklAItOubG75SEBJ4ttKhYI0QG2h5ewYE0ZAfwfnUKWtSkBa8mu4\u002fB5NQPmPLv+OhDxAZj\u002f8TLU0PUD3ggTBCoZKQI8ChWks30RAY4XS4YWgR0A="},"type":"scatter"}],                        {"margin":{"b":40,"l":40,"r":40,"t":100},"shapes":[{"fillcolor":"rgba(255, 165, 0, 0.07)","layer":"below","line":{"width":0},"type":"rect","x0":2.3029334323642625,"x1":8.832236887220727,"y0":43.36057091939634,"y1":63.24208741446337},{"fillcolor":"rgba(0, 255, 0, 0.07)","layer":"below","line":{"width":0},"type":"rect","x0":2.3029334323642625,"x1":8.832236887220727,"y0":15.509846380884742,"y1":43.36057091939634},{"fillcolor":"rgba(255, 0, 0, 0.07)","layer":"below","line":{"width":0},"type":"rect","x0":-6.4067894644192105,"x1":2.3029334323642625,"y0":43.36057091939634,"y1":63.24208741446337},{"fillcolor":"rgba(128, 128, 128, 0.07)","layer":"below","line":{"width":0},"type":"rect","x0":-6.4067894644192105,"x1":2.3029334323642625,"y0":15.509846380884742,"y1":43.36057091939634}],"template":{"data":{"barpolar":[{"marker":{"line":{"color":"rgb(17,17,17)","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#f2f5fa"},"error_y":{"color":"#f2f5fa"},"marker":{"line":{"color":"rgb(17,17,17)","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#A2B1C6","gridcolor":"#506784","linecolor":"#506784","minorgridcolor":"#506784","startlinecolor":"#A2B1C6"},"baxis":{"endlinecolor":"#A2B1C6","gridcolor":"#506784","linecolor":"#506784","minorgridcolor":"#506784","startlinecolor":"#A2B1C6"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"line":{"color":"#283442"}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"marker":{"line":{"color":"#283442"}},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#506784"},"line":{"color":"rgb(17,17,17)"}},"header":{"fill":{"color":"#2a3f5f"},"line":{"color":"rgb(17,17,17)"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#f2f5fa","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#f2f5fa"},"geo":{"bgcolor":"rgb(17,17,17)","lakecolor":"rgb(17,17,17)","landcolor":"rgb(17,17,17)","showlakes":true,"showland":true,"subunitcolor":"#506784"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"dark"},"paper_bgcolor":"rgb(17,17,17)","plot_bgcolor":"rgb(17,17,17)","polar":{"angularaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"bgcolor":"rgb(17,17,17)","radialaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"},"yaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"},"zaxis":{"backgroundcolor":"rgb(17,17,17)","gridcolor":"#506784","gridwidth":2,"linecolor":"#506784","showbackground":true,"ticks":"","zerolinecolor":"#C8D4E3"}},"shapedefaults":{"line":{"color":"#f2f5fa"}},"sliderdefaults":{"bgcolor":"#C8D4E3","bordercolor":"rgb(17,17,17)","borderwidth":1,"tickwidth":0},"ternary":{"aaxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"baxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""},"bgcolor":"rgb(17,17,17)","caxis":{"gridcolor":"#506784","linecolor":"#506784","ticks":""}},"title":{"x":0.05},"updatemenudefaults":{"bgcolor":"#506784","borderwidth":0},"xaxis":{"automargin":true,"gridcolor":"#283442","linecolor":"#506784","ticks":"","title":{"standoff":15},"zerolinecolor":"#283442","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#283442","linecolor":"#506784","ticks":"","title":{"standoff":15},"zerolinecolor":"#283442","zerolinewidth":2}}},"title":{"font":{"size":18},"text":"Network Investment Map\u003cbr\u003e\u003cspan style='font-size:12px;color:#888'\u003eBubble Size: Bigger Nodes = High Scarcity. Smaller Nodes = Higher Supply.\u003c\u002fspan\u003e"},"xaxis":{"range":[-6.4067894644192105,8.832236887220727],"title":{"text":"Pop Growth %"}},"yaxis":{"range":[15.509846380884742,63.24208741446337],"title":{"text":"Value Growth %"}}},                        {"responsive": true}                    )                };            </script>        </div></div>
+        <div id="side-panel">
+            <div id="card-content">
+                <div class="city-name">Strategic View</div>
+                <p style="font-size: 13px; color: #888;">Select a node to evaluate network efficiency.</p>
+            </div>
+            
+            <div class="legend-box">
+                <div class="metric-title" style="margin-bottom:10px">Map Legend</div>
+                <div class="legend-item"><span class="dot" style="background: cyan; width:20px; height:20px"></span> Node Size = Scarcity (Structural Pressure)</div>
+                <div class="legend-item"><span class="dot" style="background: yellow"></span> Color = High Velocity & Growth Score</div>
+                <div class="legend-item"><span class="dot" style="background: purple"></span> Color = Low Velocity (Market Friction)</div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var gd = document.getElementsByClassName('plotly-graph-div')[0];
+        gd.on('plotly_click', function(data){
+            var p = data.points[0];
+            var price = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact' }).format(p.customdata[2]);
+            var content = document.getElementById('card-content');
+            content.innerHTML = `
+                <div class="city-name">${p.text}</div>
+                <div class="metric-grid">
+                    <div class="metric-box">
+                        <div class="metric-title">Median Home Value</div>
+                        <div class="metric-value">${price}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-title">Avg Appreciation (6yr)</div>
+                        <div class="metric-value">${p.customdata[4].toFixed(1)}%</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-title">Avg Pop Growth (4yr)</div>
+                        <div class="metric-value">${p.customdata[3].toFixed(1)}%</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-title">Avg Days on Market (33 healthy)</div>
+                        <div class="metric-value">${p.customdata[0].toFixed(0)}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-title">Scarcity Ratio (Node Size)</div>
+                        <span class="formula">Total Pop / Current Inventory</span>
+                        <div class="metric-value">${p.customdata[1].toFixed(1)}</div>
+                    </div>
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html>
